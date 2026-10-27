@@ -1,0 +1,52 @@
+# Smoke test on synthetic data (tests/make_synthetic.py). Numbers are meaningless.
+output_dir: ../results_smoke
+seeds: [0, 1]
+split: {train: 0.6, val: 0.2, test: 0.2, by_class: true}
+model:
+  rf: {n_estimators: 50, class_weight: balanced, n_jobs: -1}
+  xgb: {n_estimators: 50}
+  autoencoder: {max_iter: 20}
+xai:
+  n_alerts: 60
+  lime_num_samples: 500
+  lime_stability_alerts: 8
+  lime_stability_runs: 3
+  permutation_sample: 3000
+bootstrap: {n: 100}
+e4: {targets: [unsw, ptma]}
+e5: {datasets: [cic, unsw_official]}
+
+_flow_dataset: &flow
+  label_col: Label
+  benign_labels: [BENIGN]
+  timestamp_col: Timestamp
+  drop_cols: [Flow ID]
+  meta_cols: [Src IP, Src Port, Dst IP, Dst Port]
+  categorical_cols: [Protocol]
+
+datasets:
+  cic:
+    <<: *flow
+    path: ../tests/synthetic/cic_corrected
+    attempted_pattern: Attempted
+    attempted_policy: drop
+  cic_original:
+    <<: *flow
+    path: ../tests/synthetic/cic_original
+    attempted_pattern: Attempted
+    attempted_policy: attack
+  unsw:
+    <<: *flow
+    path: ../tests/synthetic/unsw_flows
+  ptma:
+    <<: *flow
+    path: ../tests/synthetic/ptma_flows
+  unsw_official:
+    partition: official
+    train_path: ../tests/synthetic/unsw_official/UNSW_NB15_training-set.csv
+    test_path: ../tests/synthetic/unsw_official/UNSW_NB15_testing-set.csv
+    label_col: label
+    label_is_binary: true
+    class_col: attack_cat
+    drop_cols: [id]
+    categorical_cols: [proto, service, state]

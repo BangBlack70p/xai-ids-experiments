@@ -1,0 +1,85 @@
+# Paper A - real data configuration.
+# Paths are relative to this file and follow the folder layout on the laptop:
+#   xai-ids-experiments/raw/...            (datasets as delivered)
+#   xai-ids-experiments/raw/original/...
+#   xai-ids-experiments/data/...           (produced by scripts/ in this package)
+# Check column names first with:
+#   python -m xai_ids.run --config configs/cic_unsw_ptma.yaml --inspect
+output_dir: ../results
+seeds: [0, 1, 2, 3, 4]
+split:
+  train: 0.6
+  val: 0.2
+  test: 0.2
+  by_class: true          # chronological within each (day, class); false = whole days
+model:
+  rf: {n_estimators: 200, class_weight: balanced, n_jobs: -1}
+  xgb: {n_estimators: 300, max_depth: 8, learning_rate: 0.1}
+  autoencoder: {max_iter: 50, max_rows: 200000}
+  resample: null          # or smote / smote_tomek (needs imbalanced-learn); training set only
+xai:
+  n_alerts: 500
+  top_k: 5
+  deletion_max_k: 10
+  lime_num_samples: 2000
+  lime_stability_alerts: 50
+  lime_stability_runs: 10
+  permutation_sample: 50000
+bootstrap: {n: 1000}
+e2: {models: [lr, dt, rf, xgb, iforest, autoencoder]}
+e4: {targets: [unsw, ptma]}            # flows re-extracted with the SAME patched CICFlowMeter
+e5: {datasets: [cic, unsw_official]}
+shared_features: null                  # null = intersection of columns
+
+# Flows written by CICFlowMeter (Engelen et al. fixed version, patched timestamp).
+# Timestamp looks like "04/07/2017 01:53:44 PM" = 4 July 2017, 13:53:44.
+_cicflowmeter: &cfm
+  label_col: label
+  benign_labels: [BENIGN, Benign, Normal]
+  timestamp_col: timestamp
+  timestamp_format: "%d/%m/%Y %I:%M:%S %p"
+  drop_cols: [flow_id]
+  meta_cols: [src_ip, src_port, dst_ip, dst_port, src_internal, dst_internal]   # kept out of X (Fig. 3)
+  categorical_cols: [protocol]
+
+datasets:
+  # CIC-IDS2017, label-corrected release of Engelen et al. (2021): raw/dataset.zip
+  # 2,100,814 flows; 9,144 "- Attempted" flows.
+  cic:
+    <<: *cfm
+    path: "../raw/dataset.zip"
+    attempted_pattern: Attempted
+    attempted_policy: drop               # drop | benign | attack  (state the choice in the paper)
+    # sample_frac: 0.2                   # uncomment for a quick trial run
+
+  # Original MachineLearningCVE release (only for the E1 "conventional" row).
+  # No timestamp/IPs; "Fwd Header Length" appears twice; Destination Port is removed.
+  cic_original:
+    path: "../raw/original/CIC-IDS2017.zip"
+    label_col: label
+    benign_labels: [BENIGN]
+    drop_cols: [destination_port, fwd_header_length_1]
+
+  # UNSW-NB15 day 2 PCAPs (1-17.pcap) -> CICFlowMeter -> labelled with NUSW-NB15_GT.csv
+  unsw:
+    <<: *cfm
+    path: "../data/unsw_flows_labelled"
+    timestamp_format: ISO8601            # current CICFlowMeter: "2025-10-29 13:26:00.576890" (UTC)
+
+  # PTMA today.pcapng -> CICFlowMeter -> labelled from Suricata alerts -> pseudonymised
+  ptma:
+    <<: *cfm
+    path: "../data/ptma_flows_labelled"
+    noc_pseudonyms: "../data/ptma_noc_pseudonyms.txt"   # from scripts/noc_pseudonyms.py (CASE)
+    timestamp_format: ISO8601            # current CICFlowMeter: "2025-10-29 13:26:00.576890" (UTC)
+
+  # UNSW-NB15 official training/testing CSVs (replication in its own 42-feature space).
+  unsw_official:
+    partition: official
+    train_path: "../raw/Training and Testing Sets UNSW-NB15/UNSW_NB15_training-set.csv"
+    test_path: "../raw/Training and Testing Sets UNSW-NB15/UNSW_NB15_testing-set.csv"
+    label_col: label
+    label_is_binary: true
+    class_col: attack_cat
+    drop_cols: [id]
+    categorical_cols: [proto, service, state]

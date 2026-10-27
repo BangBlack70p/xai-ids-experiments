@@ -1,0 +1,16 @@
+results/
+results_*/
+tests/synthetic/
+data/
+tools/CICFlowMeter-src/
+__pycache__/
+*.pyc
+.venv/
+# --- added for public release: raw data, real IPs and local paths stay private ---
+raw/
+logs/
+build-log.txt
+*.pcap
+*.pcapng
+*.key
+data/ptma_noc_pseudonyms.txt

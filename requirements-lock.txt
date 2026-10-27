@@ -1,0 +1,13 @@
+# Exact versions used for the reported results (Python 3.14.7, Windows 10 Pro)
+numpy==2.5.4
+pandas==3.1.0
+scipy==1.18.1
+scikit-learn==1.9.1
+xgboost==3.4.1
+shap==0.54.1
+lime==0.2.0.1
+matplotlib==3.11.2
+pyyaml==6.0.3
+tabulate==0.10.0
+# External tools: CICFlowMeter commit 4dd5319 (Docker, OpenJDK 8, patched as in tools/cicflowmeter/Dockerfile);
+# Suricata 8.0.6 with the ET Open ruleset downloaded 27 Oct 2026 (51,506 rules loaded)
