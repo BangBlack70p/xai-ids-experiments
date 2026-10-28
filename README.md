@@ -1,5 +1,7 @@
 # Leakage-safe explainable intrusion detection for data breach triage in higher education
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23716633.svg)](https://doi.org/10.5281/zenodo.23716633)
+
 Experiment code for the paper *Consistent Explanations, Failing Detectors: Leakage-Safe Evaluation of Explainable Intrusion Detection for Data Breach Triage in Higher Education* (S. Gunanto, Universitas Sriwijaya). Indonesian notes: [README.id.md](README.id.md).
 
 | Experiment | Content | Paper section |
@@ -67,4 +69,4 @@ Results are written to `results/` as Markdown, CSV and PNG; key numbers are coll
 
 ## Licence and citation
 
-MIT licence. Please cite the paper and this software release (see `CITATION.cff`).
+MIT licence. Please cite the paper and this software release: S. Gunanto, version 1.0.0, Zenodo, doi:10.5281/zenodo.23716633 (see `CITATION.cff`).
